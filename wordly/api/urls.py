@@ -1,7 +1,6 @@
 from django.urls import path, include
-from .views import index
 
 urlpatterns = [
-    path('users/', include('users.urls', namespace='users')),
-    path('', index),
+    path('lobby/', include('lobbys.urls')),
+    path('', include('players.urls'))
 ]

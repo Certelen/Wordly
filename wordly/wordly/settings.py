@@ -18,7 +18,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',
+    'rest_framework',
+    'players',
     'lobbys',
     'api'
 ]
@@ -53,8 +54,6 @@ TEMPLATES = [
         },
     },
 ]
-
-AUTH_USER_MODEL = 'users.Player'
 
 WSGI_APPLICATION = 'wordly.wsgi.application'
 

@@ -1,9 +1,13 @@
 from django.db import models
 
-from users.models import Player
+from players.models import Player
 
 
 class Lobby(models.Model):
+    lobby_id = models.CharField(
+        'Id лобби',
+        max_length=20
+    )
     lobby_creater = models.OneToOneField(
         Player,
         on_delete=models.CASCADE,
