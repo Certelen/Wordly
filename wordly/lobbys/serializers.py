@@ -6,9 +6,13 @@ from .models import Lobby
 class LobbySerializer(serializers.ModelSerializer):
     create_lobby = serializers.ChoiceField(
         {4, 5, 6},
-        label='Создать лобби c выбранной длиной слова'
+        label='Создать лобби c выбранной длиной слова',
+        required=False
     )
-    find_lobby = serializers.CharField(label='Найти лобби')
+    find_lobby = serializers.CharField(
+        label='Найти лобби',
+        required=False
+    )
 
     class Meta:
         model = Lobby
@@ -35,3 +39,10 @@ class LobbySerializer(serializers.ModelSerializer):
                 'Лобби с таким Id не существует'
             )
         return data
+
+    def save(self, **kwargs):
+        if 'create_lobby' in self.validated_data:
+            self.validated_data.pop('create_lobby')
+        if 'find_lobby' in self.validated_data:
+            self.validated_data.pop('find_lobby')
+        super(LobbySerializer, self).save(**kwargs)

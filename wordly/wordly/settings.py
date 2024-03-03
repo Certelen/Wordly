@@ -20,8 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'players',
-    'lobbys',
-    'api'
+    'lobbys'
 ]
 
 MIDDLEWARE = [

@@ -22,15 +22,11 @@ section:first-child {
     margin-right: 20%;
 }
 
-#i2-1-1,
-#i3-1-5,
 .correct {
     background-color: green;
     color: white;
 }
 
-#i2-1-5,
-#i3-1-1,
 .incorrectIndex {
     background-color: yellow;
     color: white;

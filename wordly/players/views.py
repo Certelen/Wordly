@@ -21,10 +21,22 @@ class PlayerViewSet(
         serialized = PlayerSerializer(data=request.data)
         player = Player.objects.filter(username=request.data['username'])
         if player:
-            return redirect('../lobby/', permanent=True)
+            lobby = player[0].lobby_id
+            if lobby:
+                return redirect(
+                    f'../lobby/{player[0].username}/{lobby}/',
+                    permanent=True
+                )
+            return redirect(
+                f'../lobby/{player[0].username}/',
+                permanent=True
+            )
         if serialized.is_valid():
             player = Player.objects.create(username=request.data['username'])
-            return redirect('../lobby/', permanent=True)
+            return redirect(
+                f'../lobby/{player[0].username}/',
+                permanent=True
+            )
         else:
             return response.Response(
                 serialized._errors,
