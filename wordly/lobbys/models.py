@@ -10,7 +10,7 @@ class Lobby(models.Model):
         'Id лобби',
         max_length=20
     )
-    lobby_creater = models.OneToOneField(
+    lobby_creater = models.ForeignKey(
         Player,
         on_delete=models.CASCADE,
         blank=True,
@@ -20,11 +20,11 @@ class Lobby(models.Model):
     )
     used_words_player_one = models.CharField(
         'Указанные слова первого игрока',
-        max_length=25,
+        max_length=50,
         blank=True,
-        null=True
+        default=""
     )
-    lobby_player = models.OneToOneField(
+    lobby_player = models.ForeignKey(
         Player,
         on_delete=models.CASCADE,
         blank=True,
@@ -34,19 +34,17 @@ class Lobby(models.Model):
     )
     used_words_player_two = models.CharField(
         'Указанные слова второго игрока',
-        max_length=25,
+        max_length=50,
         blank=True,
-        null=True
+        default=""
     )
-    used_letters = models.CharField(
-        'Использованные буквы',
-        max_length=150,
+    winner = models.ForeignKey(
+        Player,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
-    )
-    start = models.BooleanField(
-        'Игра начата',
-        default=False
+        related_name='winner',
+        verbose_name='Победитель лобби',
     )
     win_word = models.CharField(
         'Загаданное слово',

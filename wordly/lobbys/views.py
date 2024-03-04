@@ -1,7 +1,6 @@
-from rest_framework import mixins, viewsets, status, response
+from rest_framework import mixins, viewsets
 from rest_framework.serializers import ValidationError
 from rest_framework.decorators import api_view
-
 from django.shortcuts import redirect, render
 
 from .serializers import LobbySerializer
@@ -26,10 +25,13 @@ class LobbyViewSet(
         serializer.is_valid(raise_exception=True)
         lobby = request.data['find_lobby']
         if lobby and not Lobby.objects.get(lobby_id=lobby).lobby_player:
+            now_lobby = Lobby.objects.get(lobby_id=lobby)
+            now_lobby.lobby_player = player[0]
+            now_lobby.save()
             player[0].lobby_id = lobby
             player[0].save()
             return redirect(
-                f'../lobby/{request.username}/{lobby}/',
+                f'../{kwargs["username"]}/{lobby}/',
                 permanent=True
             )
         self.perform_create(serializer, **kwargs)
@@ -43,7 +45,8 @@ class LobbyViewSet(
             username=kwargs['username'])
         if data['lobby_creater'].lobby_id:
             raise ValidationError(
-                'Вы уже учавствуете в игре'
+                'Вы уже учавствуете в игре, id игры: ' +
+                data['lobby_creater'].lobby_id
             )
         data['lobby_id'] = Lobby.create_lobby_id()
         data['win_word'] = Lobby.get_random_word(
@@ -55,7 +58,7 @@ class LobbyViewSet(
         )
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def lobby_game(request, username, lobby_id):
     if not (Player.objects.filter(username=username) and
             Lobby.objects.filter(lobby_id=lobby_id)):
@@ -63,6 +66,53 @@ def lobby_game(request, username, lobby_id):
             '../../../login/',
             permanent=True
         )
-    if request.method == 'GET':
-        template = 'wordly.html'
-        return render(request, template, context={'SIGNUP': True})
+    template = 'wordly.html'
+    lobby = Lobby.objects.get(lobby_id=lobby_id)
+    player = Player.objects.get(username=username)
+    if lobby.lobby_creater == player:
+        now_player = '0'
+    else:
+        now_player = '1'
+    if lobby.winner:
+        if lobby.lobby_creater == lobby.winner:
+            winner = "1"
+        else:
+            winner = "2"
+    else:
+        winner = "0"
+    if request.method == 'POST':
+        guess_word = request.data['guess_word']
+        if guess_word == lobby.win_word:
+            lobby.winner = player
+            lobby.lobby_creater.lobby_id = ""
+            lobby.lobby_player.lobby_id = ""
+            lobby.lobby_creater.save()
+            lobby.lobby_player.save()
+        guess_word = list(guess_word)
+        for letter_num in range(0, len(lobby.win_word)):
+            if guess_word[letter_num] == lobby.win_word[letter_num]:
+                guess_word[letter_num] += ':2'
+            elif guess_word[letter_num] in lobby.win_word:
+                guess_word[letter_num] += ':1'
+            else:
+                guess_word[letter_num] += ':0'
+            if letter_num == len(guess_word)-1:
+                guess_word += ";"
+            else:
+                guess_word[letter_num] += ","
+        if lobby.lobby_creater == player:
+            lobby.used_words_player_one += ''.join(guess_word)
+        elif lobby.lobby_player == player:
+            lobby.used_words_player_two += ''.join(guess_word)
+        lobby.save()
+
+    return render(
+        request, template,
+        context={
+            'now_player': now_player,
+            'p1_words': lobby.used_words_player_one[:-1],
+            'p2_words': lobby.used_words_player_two[:-1],
+            'letters': len(lobby.win_word),
+            'winner': winner
+        },
+    )

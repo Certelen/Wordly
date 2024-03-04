@@ -1,43 +1,67 @@
-input[type="text"] {
-    width: 40px;
-    height: 40px;
+h1 {
     text-align: center;
-    font-size: 24px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    margin: 2px;
 }
 
-input[type="submit"] {
-    height: 40px;
-    border-radius: 10px;
-}
-
-div {
+#game-board {
     display: flex;
     margin-bottom: 100px;
 }
 
-section:first-child {
-    margin-right: 20%;
+
+section:first-child,
+section:last-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-basis: 0;
+    flex-grow: 1;
+    padding: 3em;
 }
 
-.correct {
+.letter-row_0,
+.letter-row_1,
+#first,
+#second,
+#third {
+    display: flex;
+}
+
+.letter-box {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    font-size: 22px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin: 2px;
+    text-transform: uppercase;
+}
+
+.letter-box-disable {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    font-size: 24px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin: 2px;
+    text-transform: uppercase;
+}
+
+#correct {
     background-color: green;
     color: white;
 }
 
-.incorrectIndex {
+#incorrectIndex {
     background-color: yellow;
-    color: white;
 }
 
-.incorrect {
+#incorrect {
     background-color: grey;
-}
-
-::-webkit-input-placeholder {
-    color: black;
 }
 
 #second {
@@ -49,5 +73,7 @@ section:first-child {
 }
 
 .qwerty {
-    margin-left: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

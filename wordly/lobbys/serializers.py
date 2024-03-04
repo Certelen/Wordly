@@ -34,7 +34,7 @@ class LobbySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Выберите одно из действий'
             )
-        if validate_find and Lobby.objects.filter(lobby_id=validate_find):
+        if validate_find and not Lobby.objects.filter(lobby_id=validate_find):
             raise serializers.ValidationError(
                 'Лобби с таким Id не существует'
             )
