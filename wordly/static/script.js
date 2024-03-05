@@ -221,6 +221,12 @@ document.addEventListener("keydown", (e) => {
 
 })
 
-
 initBoard();
 checkWinner();
+wait_other();
+
+function wait_other() {
+    if ((now_player == "0" && guessesRemaining[0] === guessesRemaining[1]) || (now_player == "1" && guessesRemaining[0] > guessesRemaining[1])) {
+        setTimeout(() => { location.reload(); }, 5000)
+    }
+}
