@@ -48,6 +48,16 @@ class Lobby(models.Model):
         'Загаданное слово',
         max_length=6
     )
+    created_date = models.DateTimeField(
+        'Дата создания лобби',
+        null=True,
+        blank=True
+    )
+    end_date = models.DateTimeField(
+        'Дата победы',
+        null=True,
+        blank=True
+    )
 
     @staticmethod
     def create_lobby_id():

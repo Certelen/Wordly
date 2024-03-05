@@ -5,4 +5,4 @@ from .models import Player
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    pass
+    exclude = ('now_game_date', 'games', 'attempts_guess', 'time_game',)

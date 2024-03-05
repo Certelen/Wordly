@@ -25,6 +25,7 @@ class LobbySerializer(serializers.ModelSerializer):
         read_only_fields = (
             'lobby_creater',
             'win_word',
+            'created_date'
         )
 
     def validate(self, data):

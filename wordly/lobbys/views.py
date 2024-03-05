@@ -3,6 +3,7 @@ from players.models import Player
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.serializers import ValidationError
+import datetime
 
 from .models import Lobby
 from .serializers import LobbySerializer
@@ -67,6 +68,7 @@ class LobbyViewSet(
                 data['lobby_creater'].lobby_id
             )
         data['lobby_id'] = Lobby.create_lobby_id()
+        data['created_date'] = datetime.datetime.now()
         data['win_word'] = Lobby.get_random_word(
             serializer.validated_data.get('create_lobby'))
         data['lobby_creater'].lobby_id = data['lobby_id']
@@ -85,9 +87,15 @@ def lobby_game(request, username, lobby_id):
             '../../../login/',
             permanent=True
         )
-    template = 'wordly.html'
     lobby = Lobby.objects.get(lobby_id=lobby_id)
     player = Player.objects.get(username=username)
+    if (lobby.lobby_creater != player and
+            lobby.lobby_player != player):
+        return redirect(
+            '../../../login/',
+            permanent=True
+        )
+    template = 'wordly.html'
     if lobby.lobby_creater == player:
         now_player = '0'
     else:
@@ -103,10 +111,20 @@ def lobby_game(request, username, lobby_id):
         guess_word = request.data['guess_word']
         if guess_word == lobby.win_word:
             lobby.winner = player
+            end_date = datetime.datetime.now()
+            start_date = lobby.created_date.replace(tzinfo=None)
+            duration_game = end_date - start_date
+            lobby.end_date = end_date
+            if lobby.lobby_creater == player:
+                lobby.lobby_creater.win_games += 1
+            else:
+                lobby.lobby_player.win_games += 1
+            lobby.lobby_player.games += 1
+            lobby.lobby_creater.games += 1
+            lobby.lobby_creater.time_game += duration_game
+            lobby.lobby_player.time_game += duration_game
             lobby.lobby_creater.lobby_id = ""
             lobby.lobby_player.lobby_id = ""
-            lobby.lobby_creater.save()
-            lobby.lobby_player.save()
         guess_word = list(guess_word)
         for letter_num in range(0, len(lobby.win_word)):
             if guess_word[letter_num] == lobby.win_word[letter_num]:
@@ -121,9 +139,14 @@ def lobby_game(request, username, lobby_id):
                 guess_word[letter_num] += ","
         if lobby.lobby_creater == player:
             lobby.used_words_player_one += ''.join(guess_word)
+            lobby.lobby_creater.attempts_guess += 1
         elif lobby.lobby_player == player:
             lobby.used_words_player_two += ''.join(guess_word)
+            lobby.lobby_player.attempts_guess += 1
+
         lobby.save()
+        lobby.lobby_creater.update_player(lobby.lobby_creater)
+        lobby.lobby_player.update_player(lobby.lobby_player)
 
     return render(
         request, template,
