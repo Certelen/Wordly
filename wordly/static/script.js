@@ -81,6 +81,15 @@ function initBoard() {
         let section = document.getElementById("Player_1")
         section.className = 'now_turn'
     }
+    if (winner != "0") {
+        let link = document.createElement("a")
+        let link_text = document.createTextNode("Вернуться в создание и поиск лобби")
+        link.appendChild(link_text)
+        let lobby_url = document.URL.split('/')
+        link.href = lobby_url[0] + '/' + lobby_url[1] + '/' + lobby_url[2] + '/' + lobby_url[3] + '/' + lobby_url[4]
+        link.className = "return"
+        document.body.appendChild(link)
+    }
 }
 
 // выйграна ли игра
