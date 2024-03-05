@@ -1,9 +1,9 @@
-from rest_framework import mixins, viewsets, status, response
-from rest_framework.decorators import action
 from django.shortcuts import redirect
+from rest_framework import mixins, response, status, viewsets
+from rest_framework.decorators import action
 
-from .serializers import PlayerSerializer
 from .models import Player
+from .serializers import PlayerSerializer
 
 
 class PlayerViewSet(

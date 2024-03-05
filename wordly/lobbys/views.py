@@ -1,11 +1,11 @@
-from rest_framework import mixins, viewsets
-from rest_framework.serializers import ValidationError
-from rest_framework.decorators import api_view
 from django.shortcuts import redirect, render
-
-from .serializers import LobbySerializer
-from .models import Lobby
 from players.models import Player
+from rest_framework import mixins, viewsets
+from rest_framework.decorators import api_view
+from rest_framework.serializers import ValidationError
+
+from .models import Lobby
+from .serializers import LobbySerializer
 
 
 class LobbyViewSet(

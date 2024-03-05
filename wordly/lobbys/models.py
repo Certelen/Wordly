@@ -1,7 +1,7 @@
-from django.db import models
 import random
 import string
 
+from django.db import models
 from players.models import Player
 
 
@@ -72,4 +72,7 @@ class Lobby(models.Model):
         return random.sample(sorted(WORDS), 1)[0]
 
     def __str__(self):
-        return 'Лобби игрока ' + self.lobby_creater.username
+        return ('Лобби игрока ' +
+                self.lobby_creater.username +
+                ' с id: ' +
+                self.lobby_id)
