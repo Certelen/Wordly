@@ -51,6 +51,10 @@ section:last-child {
     text-transform: uppercase;
 }
 
+.now_turn {
+    background-color: rgb(175, 255, 175);
+}
+
 #correct {
     background-color: green;
     color: white;

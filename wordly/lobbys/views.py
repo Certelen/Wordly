@@ -16,6 +16,7 @@ class LobbyViewSet(
     serializer_class = LobbySerializer
 
     def create(self, request, *args, **kwargs):
+        """Создание, либо поиск лобби."""
         player = Player.objects.filter(username=kwargs['username'])
         if not player:
             raise ValidationError(
@@ -24,16 +25,32 @@ class LobbyViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         lobby = request.data['find_lobby']
-        if lobby and not Lobby.objects.get(lobby_id=lobby).lobby_player:
+        if lobby:
+            """Поиск лобби."""
             now_lobby = Lobby.objects.get(lobby_id=lobby)
-            now_lobby.lobby_player = player[0]
-            now_lobby.save()
-            player[0].lobby_id = lobby
-            player[0].save()
-            return redirect(
-                f'../{kwargs["username"]}/{lobby}/',
-                permanent=True
-            )
+            if (not Lobby.objects.get(lobby_id=lobby).lobby_player):
+                if player[0] == now_lobby.lobby_creater:
+                    return redirect(
+                        f'../{kwargs["username"]}/{lobby}/',
+                        permanent=True
+                    )
+                now_lobby.lobby_player = player[0]
+                now_lobby.save()
+                player[0].lobby_id = lobby
+                player[0].save()
+                return redirect(
+                    f'../{kwargs["username"]}/{lobby}/',
+                    permanent=True
+                )
+            else:
+                if player[0] == now_lobby.lobby_player:
+                    return redirect(
+                        f'../{kwargs["username"]}/{lobby}/',
+                        permanent=True
+                    )
+                raise ValidationError(
+                    'В лобби уже есть второй игрок!'
+                )
         self.perform_create(serializer, **kwargs)
         return redirect(
             f'{Player.objects.get(username=kwargs["username"]).lobby_id}/',
@@ -41,6 +58,7 @@ class LobbyViewSet(
         )
 
     def perform_create(self, serializer, data={}, **kwargs):
+        """Создание лобби."""
         data['lobby_creater'] = Player.objects.get(
             username=kwargs['username'])
         if data['lobby_creater'].lobby_id:
@@ -60,6 +78,7 @@ class LobbyViewSet(
 
 @api_view(['GET', 'POST'])
 def lobby_game(request, username, lobby_id):
+    """Обработчик игры со стороны сервера."""
     if not (Player.objects.filter(username=username) and
             Lobby.objects.filter(lobby_id=lobby_id)):
         return redirect(

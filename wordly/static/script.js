@@ -22,6 +22,7 @@ let disable = false
 // создаём игровое поле
 function initBoard() {
     let board = document.getElementById("game-board");
+    // 2 секции - 2 игрока
     for (let j = 0; j < 2; j++) {
         let section = document.createElement("section")
         section.id = "Player_" + (j + 1)
@@ -30,12 +31,15 @@ function initBoard() {
         h2.textContent = "Player " + (j + 1)
         section.appendChild(h2)
         let player_words = words[j]
+        // 5 строк - 5 слов
         for (let i = 0; i < NUMBER_OF_GUESSES; i++) {
             let row = document.createElement("div")
             row.className = "letter-row_" + (j)
+            // 4-6 букв
             for (let g = 0; g < letters; g++) {
                 let box = document.createElement("div")
                 box.className = "letter-box"
+                // вставляем буквы уже существующих слов, красим их
                 if (player_words[0] != "" && player_words.length > i) {
                     let now_word = player_words[i].split(",")
                     now_color = now_word[g][2]
@@ -68,8 +72,18 @@ function initBoard() {
             section.appendChild(row)
         }
     }
+    // подсвечиваем зеленым фоном чей сейчас ход
+    if (guessesRemaining[0] === guessesRemaining[1]) {
+        let section = document.getElementById("Player_2")
+        section.className = 'now_turn'
+    }
+    if (guessesRemaining[0] > guessesRemaining[1]) {
+        let section = document.getElementById("Player_1")
+        section.className = 'now_turn'
+    }
 }
 
+// выйграна ли игра
 function checkWinner() {
     if (winner != "0") {
         let winner_word = "Player_" + winner
@@ -91,6 +105,7 @@ function deleteLetter() {
     nextLetter -= 1
 }
 
+// получаем csrftoken
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -108,20 +123,14 @@ function getCookie(name) {
 
 // проверка введённого слова
 function checkGuess() {
-    // переменная, где будет наша догадка
     let guessString = ''
 
-    // собираем все введённые в строке буквы в одно слово
     for (const val of currentGuess) {
         guessString += val.toLowerCase()
     }
 
-
-    // если в догадке меньше 5 букв — выводим уведомление, что букв не хватает
     if (guessString.length != letters) {
-        // error означает, что уведомление будет в формате ошибки
         toastr.error("Введены не все буквы!");
-        // и после вывода выходим из проверки догадки
         return;
     }
     let WORDS_DICT = ''
@@ -130,10 +139,10 @@ function checkGuess() {
     if (letters === 6) { WORDS_DICT = SIX_WORDS }
     if (!WORDS_DICT.includes(guessString)) {
         toastr.error("Такого слова нет в списке!")
-        // и после вывода выходим из проверки догадки
         return;
     }
 
+    // отправляем запрос серверу и обновляем страницу
     const post_request = { "guess_word": guessString }
     const Http = new XMLHttpRequest();
     const url = document.URL;
@@ -160,15 +169,16 @@ function insertLetter(pressedKey) {
 
 // обработчик нажатия на клавиши
 document.addEventListener("keydown", (e) => {
+    // если игра выйграна, нет смысла играть дальше
     if (disable) {
         return
     }
     if (now_player == "0" && guessesRemaining[0] === guessesRemaining[1]) {
-        toastr.error("Ход другого игрока!")
+        toastr.error("Ход 2-ого игрока!")
         return
     }
     if (now_player == "1" && guessesRemaining[0] > guessesRemaining[1]) {
-        toastr.error("Ход другого игрока!")
+        toastr.error("Ход 1-ого игрока!")
         return
     }
 
@@ -177,9 +187,14 @@ document.addEventListener("keydown", (e) => {
     }
 
     let pressedKey = String(e.key)
-    if (pressedKey === "Backspace" && nextLetter !== 0) {
-        deleteLetter();
-        return;
+    if (pressedKey === "Backspace") {
+        if (nextLetter !== 0) {
+            deleteLetter();
+            return;
+        } else {
+            return
+        }
+
     }
 
     if (pressedKey === "Enter") {
@@ -189,10 +204,12 @@ document.addEventListener("keydown", (e) => {
 
     let found = pressedKey.match(/[а-ё]/gi)
     if (!found || found.length > 1) {
+        toastr.error("Только русские буквы из русской раскладки!")
         return
     } else {
         insertLetter(pressedKey)
     }
+
 })
 
 

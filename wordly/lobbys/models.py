@@ -13,8 +13,6 @@ class Lobby(models.Model):
     lobby_creater = models.ForeignKey(
         Player,
         on_delete=models.CASCADE,
-        blank=True,
-        null=True,
         related_name='creater',
         verbose_name='Создатель лобби',
     )

@@ -34,7 +34,7 @@ class PlayerViewSet(
         if serialized.is_valid():
             player = Player.objects.create(username=request.data['username'])
             return redirect(
-                f'../lobby/{player[0].username}/',
+                f'../lobby/{player.username}/',
                 permanent=True
             )
         else:
