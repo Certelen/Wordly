@@ -287,7 +287,9 @@ document.addEventListener("keydown", (e) => {
 
     let found = pressedKey.match(/[а-ё]/gi)
     if (!found || found.length > 1) {
-        toastr.error("Только русские буквы из русской раскладки!")
+        if (!document.getElementById('toast-container')) {
+            toastr.error("Только русские буквы из русской раскладки!")
+        }
         return
     } else {
         insertLetter(pressedKey)
