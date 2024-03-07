@@ -58,7 +58,6 @@ class Player(models.Model):
     class Meta:
         verbose_name = 'Игрок'
         verbose_name_plural = 'Игроки'
-        ordering = ('created_date',)
 
     @staticmethod
     def update_player(player):
