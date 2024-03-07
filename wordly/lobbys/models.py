@@ -59,6 +59,11 @@ class Lobby(models.Model):
         blank=True
     )
 
+    class Meta:
+        verbose_name = 'Лобби игры'
+        verbose_name_plural = 'Лобби игр'
+        ordering = ('created_date',)
+
     @staticmethod
     def create_lobby_id():
         while True:

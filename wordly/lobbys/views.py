@@ -193,8 +193,8 @@ def lobby_game(request, username, lobby_id, logic=False):
                     lobby.lobby_creater.win_games += 1
                 else:
                     lobby.lobby_player.win_games += 1
-        lobby.lobby_creater.save()
-        lobby.lobby_player.save()
+        Player.update_player(lobby.lobby_creater)
+        Player.update_player(lobby.lobby_player)
         lobby.save()
         return JsonResponse({
             'p0_words': lobby.used_words_player_one,
