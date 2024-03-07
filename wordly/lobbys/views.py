@@ -129,7 +129,8 @@ def lobby_game(request, username, lobby_id, logic=False):
         return JsonResponse({
             'p0_words': lobby.used_words_player_one,
             'p1_words': lobby.used_words_player_two,
-            'winner': winner
+            'winner': winner,
+            'winword': winword
         })
 
     if request.method == 'GET':
@@ -172,7 +173,7 @@ def lobby_game(request, username, lobby_id, logic=False):
                 lobby.used_words_player_two += ''.join(guess_word)
                 lobby.lobby_player.attempts_guess += 1
                 post = True
-        if (guess_word == lobby.win_word or
+        if (request.data['guess_word'] == lobby.win_word or
                 (len(lobby.used_words_player_one) == (4 *
                                                       letters * 5) and
                  len(lobby.used_words_player_two) == (4 *
@@ -187,8 +188,14 @@ def lobby_game(request, username, lobby_id, logic=False):
             lobby.lobby_player.time_game += duration_game
             lobby.lobby_creater.lobby_id = ""
             lobby.lobby_player.lobby_id = ""
-            if guess_word == lobby.win_word:
+            winword = lobby.win_word
+            winner = '0'
+            if request.data['guess_word'] == lobby.win_word:
                 lobby.winner = player
+                if lobby.winner == lobby.lobby_creater:
+                    winner = '1'
+                else:
+                    winner = '2'
                 if lobby.lobby_creater == player:
                     lobby.lobby_creater.win_games += 1
                 else:
@@ -200,5 +207,6 @@ def lobby_game(request, username, lobby_id, logic=False):
             'p0_words': lobby.used_words_player_one,
             'p1_words': lobby.used_words_player_two,
             'winner': winner,
-            'post': post
+            'post': post,
+            'winword': winword
         })
