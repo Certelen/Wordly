@@ -3,10 +3,23 @@ from players.models import Player
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.serializers import ValidationError
+from django.http import JsonResponse
 import datetime
 
 from .models import Lobby
 from .serializers import LobbySerializer
+
+
+def user_lobby_exist_and_get(player=False, lobby=False):
+    if player:
+        player = Player.objects.filter(username=player)
+        if player:
+            player = player[0]
+    if lobby:
+        lobby = Lobby.objects.filter(lobby_id=lobby)
+        if lobby:
+            lobby = lobby[0]
+    return [player, lobby]
 
 
 class LobbyViewSet(
@@ -18,7 +31,7 @@ class LobbyViewSet(
 
     def create(self, request, *args, **kwargs):
         """Создание, либо поиск лобби."""
-        player = Player.objects.filter(username=kwargs['username'])
+        player = user_lobby_exist_and_get(kwargs['username'], False)[0]
         if not player:
             raise ValidationError(
                 'Игрока не существует'
@@ -28,23 +41,23 @@ class LobbyViewSet(
         lobby = request.data['find_lobby']
         if lobby:
             """Поиск лобби."""
-            now_lobby = Lobby.objects.get(lobby_id=lobby)
+            now_lobby = user_lobby_exist_and_get(False, lobby)[1]
             if (not Lobby.objects.get(lobby_id=lobby).lobby_player):
-                if player[0] == now_lobby.lobby_creater:
+                if player == now_lobby.lobby_creater:
                     return redirect(
                         f'../{kwargs["username"]}/{lobby}/',
                         permanent=True
                     )
-                now_lobby.lobby_player = player[0]
+                now_lobby.lobby_player = player
                 now_lobby.save()
-                player[0].lobby_id = lobby
-                player[0].save()
+                player.lobby_id = lobby
+                player.save()
                 return redirect(
                     f'../{kwargs["username"]}/{lobby}/',
                     permanent=True
                 )
             else:
-                if player[0] == now_lobby.lobby_player:
+                if player == now_lobby.lobby_player:
                     return redirect(
                         f'../{kwargs["username"]}/{lobby}/',
                         permanent=True
@@ -79,54 +92,64 @@ class LobbyViewSet(
 
 
 @api_view(['GET', 'POST'])
-def lobby_game(request, username, lobby_id):
+def lobby_game(request, username, lobby_id, logic=False):
     """Обработчик игры со стороны сервера."""
-    if not (Player.objects.filter(username=username) and
-            Lobby.objects.filter(lobby_id=lobby_id)):
+    player, lobby = user_lobby_exist_and_get(username, lobby_id)
+    if not (lobby and player):
         return redirect(
             '../../../login/',
             permanent=True
         )
-    lobby = Lobby.objects.get(lobby_id=lobby_id)
-    player = Player.objects.get(username=username)
     if (lobby.lobby_creater != player and
             lobby.lobby_player != player):
         return redirect(
             '../../../login/',
             permanent=True
         )
-    template = 'wordly.html'
     if lobby.lobby_creater == player:
-        now_player = '0'
+        now_player = 0
     else:
-        now_player = '1'
-    if lobby.winner:
-        if lobby.lobby_creater == lobby.winner:
-            winner = "1"
+        now_player = 1
+    template = 'wordly.html'
+    winner = lobby.winner
+    winword = None
+    letters = len(lobby.win_word)
+
+    if lobby.end_date:
+        if lobby.winner:
+            if lobby.winner == lobby.lobby_creater:
+                winner = '1'
+            else:
+                winner = '2'
         else:
-            winner = "2"
-    else:
-        winner = "0"
+            winner = '0'
+        winword = lobby.win_word
+
+    if request.method == 'GET' and logic:
+        return JsonResponse({
+            'p0_words': lobby.used_words_player_one,
+            'p1_words': lobby.used_words_player_two,
+            'winner': winner
+        })
+
+    if request.method == 'GET':
+        return render(
+            request, template,
+            context={
+                'now_player': now_player,
+                'letters': letters,
+                'p0_words': lobby.used_words_player_one,
+                'p1_words': lobby.used_words_player_two,
+                'winner': winner,
+                'winword': winword
+            },
+        )
+
     if request.method == 'POST':
         guess_word = request.data['guess_word']
-        if guess_word == lobby.win_word:
-            lobby.winner = player
-            end_date = datetime.datetime.now()
-            start_date = lobby.created_date.replace(tzinfo=None)
-            duration_game = end_date - start_date
-            lobby.end_date = end_date
-            if lobby.lobby_creater == player:
-                lobby.lobby_creater.win_games += 1
-            else:
-                lobby.lobby_player.win_games += 1
-            lobby.lobby_player.games += 1
-            lobby.lobby_creater.games += 1
-            lobby.lobby_creater.time_game += duration_game
-            lobby.lobby_player.time_game += duration_game
-            lobby.lobby_creater.lobby_id = ""
-            lobby.lobby_player.lobby_id = ""
         guess_word = list(guess_word)
-        for letter_num in range(0, len(lobby.win_word)):
+        post = False
+        for letter_num in range(0, letters):
             if guess_word[letter_num] == lobby.win_word[letter_num]:
                 guess_word[letter_num] += ':2'
             elif guess_word[letter_num] in lobby.win_word:
@@ -137,24 +160,45 @@ def lobby_game(request, username, lobby_id):
                 guess_word += ";"
             else:
                 guess_word[letter_num] += ","
-        if lobby.lobby_creater == player:
-            lobby.used_words_player_one += ''.join(guess_word)
-            lobby.lobby_creater.attempts_guess += 1
-        elif lobby.lobby_player == player:
-            lobby.used_words_player_two += ''.join(guess_word)
-            lobby.lobby_player.attempts_guess += 1
-
+        if now_player == 0:
+            if not (len(lobby.used_words_player_one) ==
+                    len(lobby.used_words_player_two)):
+                lobby.used_words_player_one += ''.join(guess_word)
+                lobby.lobby_creater.attempts_guess += 1
+                post = True
+        else:
+            if not (len(lobby.used_words_player_two) >
+                    len(lobby.used_words_player_one)):
+                lobby.used_words_player_two += ''.join(guess_word)
+                lobby.lobby_player.attempts_guess += 1
+                post = True
+        if (guess_word == lobby.win_word or
+                (len(lobby.used_words_player_one) == (4 *
+                                                      letters * 5) and
+                 len(lobby.used_words_player_two) == (4 *
+                                                      letters * 5))):
+            end_date = datetime.datetime.now()
+            start_date = lobby.created_date.replace(tzinfo=None)
+            duration_game = end_date - start_date
+            lobby.end_date = end_date
+            lobby.lobby_player.games += 1
+            lobby.lobby_creater.games += 1
+            lobby.lobby_creater.time_game += duration_game
+            lobby.lobby_player.time_game += duration_game
+            lobby.lobby_creater.lobby_id = ""
+            lobby.lobby_player.lobby_id = ""
+            if guess_word == lobby.win_word:
+                lobby.winner = player
+                if lobby.lobby_creater == player:
+                    lobby.lobby_creater.win_games += 1
+                else:
+                    lobby.lobby_player.win_games += 1
+        lobby.lobby_creater.save()
+        lobby.lobby_player.save()
         lobby.save()
-        lobby.lobby_creater.update_player(lobby.lobby_creater)
-        lobby.lobby_player.update_player(lobby.lobby_player)
-
-    return render(
-        request, template,
-        context={
-            'now_player': now_player,
-            'p1_words': lobby.used_words_player_one[:-1],
-            'p2_words': lobby.used_words_player_two[:-1],
-            'letters': len(lobby.win_word),
-            'winner': winner
-        },
-    )
+        return JsonResponse({
+            'p0_words': lobby.used_words_player_one,
+            'p1_words': lobby.used_words_player_two,
+            'winner': winner,
+            'post': post
+        })

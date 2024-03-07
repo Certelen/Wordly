@@ -15,10 +15,10 @@
     <script src="{% static 'script.js' %}" type="module"></script>
     {{ now_player|json_script:"now_player" }}
     {{ letters|json_script:"letters" }}
-    {{ used_letters|json_script:"used_letters" }}
+    {{ p0_words|json_script:"p0_words" }}
     {{ p1_words|json_script:"p1_words" }}
-    {{ p2_words|json_script:"p2_words" }}
     {{ winner|json_script:"winner" }}
+    {{ winword|json_script:"winword" }}
 
 </head>
 
@@ -28,47 +28,47 @@
     <div id="game-board">
 
     </div>
-    <article class="qwerty">
-        <article id="first">
-            <div class="letter-box-disable" name="й">Й</div>
-            <div class="letter-box-disable" name="ц">Ц</div>
-            <div class="letter-box-disable" name="у">У</div>
-            <div class="letter-box-disable" name="к">К</div>
-            <div class="letter-box-disable" name="е">Е</div>
-            <div class="letter-box-disable" name="н">Н</div>
-            <div class="letter-box-disable" name="г">Г</div>
-            <div class="letter-box-disable" name="ш">Ш</div>
-            <div class="letter-box-disable" name="щ">Щ</div>
-            <div class="letter-box-disable" name="з">З</div>
-            <div class="letter-box-disable" name="х">Х</div>
-            <div class="letter-box-disable" name="ъ">Ъ</div>
-        </article>
-        <article id="second">
-            <div class="letter-box-disable" name="ф">Ф</div>
-            <div class="letter-box-disable" name="ы">Ы</div>
-            <div class="letter-box-disable" name="в">В</div>
-            <div class="letter-box-disable" name="а">А</div>
-            <div class="letter-box-disable" name="п">П</div>
-            <div class="letter-box-disable" name="р">Р</div>
-            <div class="letter-box-disable" name="о">О</div>
-            <div class="letter-box-disable" name="л">Л</div>
-            <div class="letter-box-disable" name="д">Д</div>
-            <div class="letter-box-disable" name="ж">Ж</div>
-            <div class="letter-box-disable" name="э">Э</div>
-        </article>
-        <article id="third">
-            <div class="letter-box-disable" name="я">Я</div>
-            <div class="letter-box-disable" name="ч">Ч</div>
-            <div class="letter-box-disable" name="с">С</div>
-            <div class="letter-box-disable" name="м">М</div>
-            <div class="letter-box-disable" name="и">И</div>
-            <div class="letter-box-disable" name="т">Т</div>
-            <div class="letter-box-disable" name="ь">Ь</div>
-            <div class="letter-box-disable" name="б">Б</div>
-            <div class="letter-box-disable" name="ю">Ю</div>
-            <div class="letter-box-disable" name="ё">Ё</div>
-        </article>
-    </article>
+    <div class="qwerty">
+        <div id="first">
+            <div class="letter-box" name="й">Й</div>
+            <div class="letter-box" name="ц">Ц</div>
+            <div class="letter-box" name="у">У</div>
+            <div class="letter-box" name="к">К</div>
+            <div class="letter-box" name="е">Е</div>
+            <div class="letter-box" name="н">Н</div>
+            <div class="letter-box" name="г">Г</div>
+            <div class="letter-box" name="ш">Ш</div>
+            <div class="letter-box" name="щ">Щ</div>
+            <div class="letter-box" name="з">З</div>
+            <div class="letter-box" name="х">Х</div>
+            <div class="letter-box" name="ъ">Ъ</div>
+        </div>
+        <div id="second">
+            <div class="letter-box" name="ф">Ф</div>
+            <div class="letter-box" name="ы">Ы</div>
+            <div class="letter-box" name="в">В</div>
+            <div class="letter-box" name="а">А</div>
+            <div class="letter-box" name="п">П</div>
+            <div class="letter-box" name="р">Р</div>
+            <div class="letter-box" name="о">О</div>
+            <div class="letter-box" name="л">Л</div>
+            <div class="letter-box" name="д">Д</div>
+            <div class="letter-box" name="ж">Ж</div>
+            <div class="letter-box" name="э">Э</div>
+        </div>
+        <div id="third">
+            <div class="letter-box" name="я">Я</div>
+            <div class="letter-box" name="ч">Ч</div>
+            <div class="letter-box" name="с">С</div>
+            <div class="letter-box" name="м">М</div>
+            <div class="letter-box" name="и">И</div>
+            <div class="letter-box" name="т">Т</div>
+            <div class="letter-box" name="ь">Ь</div>
+            <div class="letter-box" name="б">Б</div>
+            <div class="letter-box" name="ю">Ю</div>
+            <div class="letter-box" name="ё">Ё</div>
+        </div>
+    </div>
 </body>
 
 </html>

@@ -18,7 +18,7 @@ class Lobby(models.Model):
     )
     used_words_player_one = models.CharField(
         'Указанные слова первого игрока',
-        max_length=50,
+        max_length=100,
         blank=True,
         default=""
     )
@@ -32,7 +32,7 @@ class Lobby(models.Model):
     )
     used_words_player_two = models.CharField(
         'Указанные слова второго игрока',
-        max_length=50,
+        max_length=100,
         blank=True,
         default=""
     )
